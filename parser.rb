@@ -41,12 +41,9 @@ class Parser
     v = expr
 
     # it remains no tokens so it perfect
-    if @tokens.empty?
-      v
-    else
-      @tokens.clear
-      raise "Too much tokens..."
-    end
+    return v if @tokens.empty?
+
+    raise "Too much tokens..."
   end
 
   private
@@ -103,20 +100,20 @@ class Parser
     if @tokens.first == "("
       consume_token
       v = expr
-      if consume_token == ")"
-        v
-      else
-        raise "Parens doesn't match."
-      end
+      return v if consume_token == ")"
+
+      raise "Parens doesn't match."
 
     elsif ['+', '-'].include? @tokens.first
       @@ops[consume_token].call(0, power)
 
     else
       begin
-        Integer consume_token
+        v = consume_token
+        Integer v
       rescue
-        raise "Expected integer, found #{@tokens.first}."
+        raise "Expected integer, found "\
+              "#{v.nil? ? 'nothing' : v}."
       end
     end
   end
