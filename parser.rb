@@ -114,8 +114,7 @@ class Parser
         v = consume_token
         Integer v
       rescue
-        raise "Expected integer, found "\
-              "#{v.nil? ? 'nothing' : v}."
+        raise "Expected integer, found #{v.nil? ? 'nothing' : v}."
       end
     end
   end
