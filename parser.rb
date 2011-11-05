@@ -1,19 +1,14 @@
 load "lexer.rb"
 
-# TODO
-# - more ops?
-# - vars?
-# - better error handling
-# - degine a hash of ops/arity/fn?
-
-# Grammar:
+# The Parser class, evaluate an expression
+# with the following grammar:
 #
-# expr = term {"+" term}
-#      | term {"-" term}
+# expr = term {"+" + term}
+#      | term {"-" + term}
 #      | term
 #
-# term = factor {"*" factor}
-#      | factor {"/" factor}
+# term = factor {"*" + factor}
+#      | factor {"/" + factor}
 #      | factor
 #
 # factor = power ^ factor
@@ -22,12 +17,19 @@ load "lexer.rb"
 # power = "(" + expr + ")"
 #       | ["-" | "+"] + power
 #
-
 class Parser
-  def initialize
-    @tokens = nil
-  end
+  @tokens = nil
+  @@ops = {
+          '+' => lambda { |a, b| a + b },
+          '-' => lambda { |a, b| a - b },
+          '*' => lambda { |a, b| a * b },
+          '/' => lambda { |a, b| a / b },
+          '^' => lambda { |a, b| a ** b },
+  }
 
+  # Evaluate the expression src, and return the result
+  # Params:
+  # +src+:: the expression to evaluate.
   def eval(src)
     @tokens = Lexer.new.lex src
 
@@ -35,8 +37,10 @@ class Parser
       raise 'Empty expression.'
     end
 
+    # this is the "root" of our grammar
     v = expr
 
+    # it remains no tokens so it perfect
     if @tokens.empty?
       v
     else
@@ -47,95 +51,74 @@ class Parser
 
   private
 
+  # remove the first token of @tokens and return it
   def consume_token
     @tokens.delete_at 0
   end
 
+  # expr = term {"+" + term}
+  #      | term {"-" + term}
+  #      | term
   def expr
     lhs = term
 
+    # left associative so while (no recursion)
     while ["+", "-"].include? @tokens.first
-      op = @tokens.first
-      @tokens = @tokens.drop 1
-      rhs = term
-
-      lhs = case op
-            when "+"
-              lhs + rhs
-            when "-"
-              lhs - rhs
-            end
+      lhs = @@ops[consume_token].call(lhs, term)
     end
 
     lhs
   end
 
+  # term = factor {"*" + factor}
+  #      | factor {"/" + factor}
+  #      | factor
   def term
     lhs = factor
 
+    # left associative
     while ["*", "/"].include? @tokens.first
-      op = @tokens.first
-      @tokens = @tokens.drop 1
-      rhs = factor
-      lhs = case op
-            when "*"
-              lhs * rhs
-            when "/"
-              lhs / rhs
-            end
-
+      lhs = @@ops[consume_token].call(lhs, term)
     end
 
     lhs
   end
 
+  # factor = power ^ factor
+  #        | power
   def factor
     lhs = power
 
+    # right associative
     if ["^"].include? @tokens.first
-      op = @tokens.first
-      @tokens = @tokens.drop 1
-      rhs = factor
-
-      case op
-      when "^"
-        lhs ** rhs
-      end
+      @@ops[consume_token].call(lhs, term)
     else
       lhs
     end
   end
 
+  # power = "(" + expr + ")"
+  #       | ["-" | "+"] + power
   def power
     if @tokens.first == "("
-      @tokens = @tokens.drop 1
+      consume_token
       v = expr
-      if @tokens.first == ")"
-        @tokens = @tokens.drop 1
+      if consume_token == ")"
         v
       else
         raise "Parens doesn't match."
       end
 
     elsif ['+', '-'].include? @tokens.first
-      op = @tokens.first
-      @tokens = @tokens.drop 1
-
-      case op
-      when '+'
-        power
-      when '-'
-        -power
-      end
+      @@ops[consume_token].call(0, power)
 
     else
       begin
-        v = Integer @tokens.first
-        @tokens = @tokens.drop 1
-        v
+        Integer consume_token
       rescue
         raise "Expected integer, found #{@tokens.first}."
       end
     end
   end
 end
+
