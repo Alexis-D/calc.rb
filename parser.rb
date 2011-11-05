@@ -16,6 +16,7 @@ load "lexer.rb"
 #
 # power = "(" + expr + ")"
 #       | ["-" | "+"] + power
+#       | \d+
 #
 class Parser
   @tokens = nil
@@ -96,6 +97,7 @@ class Parser
 
   # power = "(" + expr + ")"
   #       | ["-" | "+"] + power
+  #       | \d+
   def power
     if @tokens.first == "("
       consume_token
