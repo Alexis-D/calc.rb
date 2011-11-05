@@ -1,6 +1,6 @@
 #!/usr/bin/env ruby
 
-load "parser.rb"
+require "./parser.rb"
 
 # Just compute an expression per line
 # may be called like this:

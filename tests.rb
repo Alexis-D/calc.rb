@@ -2,8 +2,8 @@
 
 require "test/unit"
 
-load "lexer.rb"
-load "parser.rb"
+load "./lexer.rb"
+load "./parser.rb"
 
 class TestLexer < Test::Unit::TestCase
   def test_lex_ok

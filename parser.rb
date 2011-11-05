@@ -1,4 +1,4 @@
-load "lexer.rb"
+require "./lexer.rb"
 
 # The Parser class, evaluate an expression
 # with the following grammar:
