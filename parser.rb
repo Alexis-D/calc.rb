@@ -34,9 +34,7 @@ class Parser
   def eval(src)
     @tokens = Lexer.new.lex src
 
-    if @tokens.empty?
-      raise 'Empty expression.'
-    end
+    raise 'Empty expression.' if @tokens.empty?
 
     # this is the "root" of our grammar
     v = expr
