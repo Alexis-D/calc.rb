@@ -3,12 +3,10 @@ require "./lexer.rb"
 # The Parser class, evaluate an expression
 # with the following grammar:
 #
-# expr = term {"+" + term}
-#      | term {"-" + term}
+# expr = term {("+" | "-") + term}
 #      | term
 #
-# term = factor {"*" + factor}
-#      | factor {"/" + factor}
+# term = factor {("*" | "/") + factor}
 #      | factor
 #
 # factor = power ^ factor
@@ -52,8 +50,7 @@ class Parser
     @tokens.delete_at 0
   end
 
-  # expr = term {"+" + term}
-  #      | term {"-" + term}
+  # expr = term {("+" | "-") + term}
   #      | term
   def expr
     lhs = term
@@ -66,8 +63,7 @@ class Parser
     lhs
   end
 
-  # term = factor {"*" + factor}
-  #      | factor {"/" + factor}
+  # term = factor {("*" | "/") + factor}
   #      | factor
   def term
     lhs = factor
